@@ -44,7 +44,8 @@ class DiscordDB(discord.Client):
         else:
             self.channel_default = self.channel_file_server
         
-        message_id = await self.channel_default.send("I am online!")
+        # message_id = await self.channel_default.send("I am online!")
+        # print(f"Bot is online! Message ID: {message_id.id}")
         
         try:
             await self.tree.sync()
@@ -52,13 +53,7 @@ class DiscordDB(discord.Client):
             pass
         
         await self.change_presence(activity = discord.Game(name = "with your data"))
-    
-    
-    
-    # @slash.slash(name = "testCommand", description = "Test command")
-    # @self.tree.command(name = "testCommand", description = "Test command")
-    async def testCommand(self, context):
-        await context.send(context.message.content)
+
 
 
     async def uploadData(self, data):
@@ -78,11 +73,12 @@ class DiscordDB(discord.Client):
 
 
 
-class DatabaseHandler(DiscordDB):
+class MongoDB():
     
     def __init__(self):
         
-        super().__init__()
+        load_dotenv()
+        
         self.__initiateMongoDB()
     
     
@@ -90,13 +86,39 @@ class DatabaseHandler(DiscordDB):
     def __initiateMongoDB(self):
         
         self.mongodb_token = getenv('MONGODB_TOKEN')
+        print(self.mongodb_token)
+    
+    
+    
+    def createUser(self, payload):
+        ...
+    
+    
+    
+    def loginUser(self, username, password):
+        ...
+    
+    
+    
+    def updateUser(self, data):
+        ...
+    
+    
+    
+    def deleteUser(self, username, password):
+        ...
+    
+    
+    
+    def banUser(self, username):
+        ...
 
 
 
 
 def initiateScript():
     
-    an_object = DatabaseHandler()
+    an_object = MongoDB()
 
 
 
