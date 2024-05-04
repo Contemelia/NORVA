@@ -1,10 +1,11 @@
+import asyncio
 import discord
+import time
+import threading
 
-# from discord_slash import SlashCommand
-from discord import app_commands
-from discord.ext import commands
 from dotenv import load_dotenv
 from os import getenv
+from pymongo import MongoClient
 
 
 
@@ -15,24 +16,24 @@ class DiscordDB(discord.Client):
     def __init__(self):
         
         super().__init__(intents = discord.Intents.all())
-        # SlashCommand(self, sync_commands = True)
         
         load_dotenv()
         
-        self.__initiateDiscordDB()
+        # asyncio.run(self.__initiateDiscordDB())
 
 
 
-    def __initiateDiscordDB(self):
+    def initiateDiscordDB(self):
         
         self.test_environment = True
         self.discord_token = getenv('DISCORD_TOKEN')
         
         self.run(self.discord_token)
+        # await self.start(self.discord_token)
+        # await self.start(self.discord_token)
     
     
 
-    # @self.event
     async def on_ready(self):
         
         self.channel_file_server = self.get_channel(int(getenv('CHANNEL_FILE_SERVER')))
@@ -44,20 +45,26 @@ class DiscordDB(discord.Client):
         else:
             self.channel_default = self.channel_file_server
         
-        # message_id = await self.channel_default.send("I am online!")
-        # print(f"Bot is online! Message ID: {message_id.id}")
+        current_time = time.time()
+        message = discord.Embed(title = "App was initialized...", description = f"Was initialized at {int(((current_time // (60 * 60)) + 3) % 24)}:{int((current_time // 60) % 60)}:{int(current_time % 60)}", color = 0x00ddaa)
+        message.set_footer(text = "Initialized by Afraaz")
+        # message_id = await self.channel_default.send(f"Was booted at {time.time()} by Afraaz")
+        message_id = await self.channel_default.send(embed = message)
         
-        try:
-            await self.tree.sync()
-        except Exception as error:
-            pass
+        # print(f"Bot is online! Message ID: {message_id.id}")
         
         await self.change_presence(activity = discord.Game(name = "with your data"))
 
 
 
     async def uploadData(self, data):
-        ...
+        
+        message = discord.Embed(title = "Data was uploaded...", description = f"Data was uploaded at {time.time()}", color = 0x00ddaa)
+        message.add_field(name = "Data", value = data)
+        message.set_footer(text = "Uploaded by Afraaz")
+        message_id = await self.channel_default.send(embed = message)
+        
+        return message_id.id
     
     
     
@@ -75,9 +82,11 @@ class DiscordDB(discord.Client):
 
 class MongoDB():
     
-    def __init__(self):
+    def __init__(self, token = None):
         
         load_dotenv()
+        
+        self.mongodb_token = token
         
         self.__initiateMongoDB()
     
@@ -85,18 +94,27 @@ class MongoDB():
        
     def __initiateMongoDB(self):
         
-        self.mongodb_token = getenv('MONGODB_TOKEN')
-        print(self.mongodb_token)
+        self.client = MongoClient(self.mongodb_token)
+        self.collection = self.client.user_data.user_data
+    
+    
+    
+    def checkExistance(self, username):
+        
+        return True if self.collection.find_one({'username': username}) else False
     
     
     
     def createUser(self, payload):
-        ...
+        
+        return self.collection.insert_one(payload)
     
     
     
-    def loginUser(self, username, password):
-        ...
+    def retrieveUser(self, username):
+        
+        return self.collection.find_one({'username': username})
+        
     
     
     
@@ -105,28 +123,11 @@ class MongoDB():
     
     
     
-    def deleteUser(self, username, password):
-        ...
+    def deleteUser(self, username):
+        
+        return self.collection.delete_one({'username': username})
     
     
     
     def banUser(self, username):
         ...
-
-
-
-
-def initiateScript():
-    
-    an_object = MongoDB()
-
-
-
-
-
-if __name__ == "__main__":
-    
-    try:
-        initiateScript()
-    except KeyboardInterrupt:
-        pass
