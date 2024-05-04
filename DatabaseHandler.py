@@ -1,130 +1,133 @@
+import asyncio
+import discord
+import time
+import threading
+
 from dotenv import load_dotenv
-from hashlib import sha256
 from os import getenv
-
-from DatabaseHandler import MongoDB
-
+from pymongo import MongoClient
 
 
 
 
-class DataHandler():
+
+class DiscordDB(discord.Client):
     
     def __init__(self):
         
+        super().__init__(intents = discord.Intents.all())
+        
         load_dotenv()
         
-        mongodb_token = getenv('MONGODB_TOKEN')
+        # asyncio.run(self.__initiateDiscordDB())
+
+
+
+    def initiateDiscordDB(self):
         
-        self.MongoDB = MongoDB(mongodb_token)    
-    
-    
-    
-    def __encryptFragment(self, fragment):
-        ...
-    
-    
-    
-    def __encryptFile(self, file):
-        ...
-    
-    
-    
-    def __decryptFragment(self, fragment):
-        ...
-    
-    
-    
-    def __decryptFile(self, file):
-        ...
-    
-    
-    
-    def __hashText(self, text):
+        self.test_environment = True
+        self.discord_token = getenv('DISCORD_TOKEN')
         
-        return sha256(text.encode()).hexdigest()
+        self.run(self.discord_token)
+        # await self.start(self.discord_token)
+        # await self.start(self.discord_token)
     
     
-    
-    def uploadFile(self, file, credentials):
-        ...
-    
-    
-    
-    def retrieveFile(self, file):
-        ...
-    
-    
-    
-    def deleteFile(self, file, credentials):
-        ...
-    
-    
-    
-    def createAccount(self, credentials):
+
+    async def on_ready(self):
         
-        username = credentials['username'].lower()
-        password = credentials['password']
-        display_name = credentials['display_name']
+        self.channel_file_server = self.get_channel(int(getenv('CHANNEL_FILE_SERVER')))
+        self.channel_test = self.get_channel(int(getenv('CHANNEL_TEST')))
+        self.channel_webhook = self.get_channel(int(getenv('CHANNEL_WEBHOOK')))
         
-        username_hash = self.__hashText(username)
-        password_hash = self.__hashText(password)
-        
-        payload = {
-            'username': username_hash, 
-            'password': password_hash, 
-            'display_name': display_name, 
-            'standing': 10.0, 
-            'status': 'active', 
-            'allowed_storage': 5120, 
-            'consumed_storage': 0, 
-            'files': []
-        }
-        
-        if not self.MongoDB.checkExistance(username_hash):
-            self.MongoDB.createUser(payload)
-            return self.MongoDB.retrieveUser(username_hash)
+        if self.test_environment:
+            self.channel_default = self.channel_test
         else:
-            return '1'
-    
-    
-    
-    def loginAccount(self, credentials):
-            
-            username = credentials['username'].lower()
-            password = credentials['password']
-            
-            username_hash = self.__hashText(username)
-            password_hash = self.__hashText(password)
-            
-            if self.MongoDB.checkExistance(username_hash):
-                user_credentials = self.MongoDB.retrieveUser(username_hash)
-                
-                if user_credentials['password'] == password_hash:
-                    if user_credentials['status'] == 'suspended':
-                        return '3'
-                    return user_credentials
-                else:
-                    return '1'
-            else:
-                return '2'
-    
-    
-    
-    def deleteAccount(self, credentials):
+            self.channel_default = self.channel_file_server
         
-        username = credentials['username'].lower()
-        password = credentials['password']
+        current_time = time.time()
+        message = discord.Embed(title = "App was initialized...", description = f"Was initialized at {int(((current_time // (60 * 60)) + 3) % 24)}:{int((current_time // 60) % 60)}:{int(current_time % 60)}", color = 0x00ddaa)
+        message.set_footer(text = "Initialized by Afraaz")
+        # message_id = await self.channel_default.send(f"Was booted at {time.time()} by Afraaz")
+        message_id = await self.channel_default.send(embed = message)
         
-        username_hash = self.__hashText(username)
-        password_hash = self.__hashText(password)
+        # print(f"Bot is online! Message ID: {message_id.id}")
         
-        if self.MongoDB.checkExistance(username_hash):
-            user = self.MongoDB.retrieveUser(username_hash)
-            
-            if user['password'] == password_hash:
-                self.MongoDB.deleteUser(username_hash, password_hash)
-            else:
-                return '1'
-        else:
-            return '2'
+        await self.change_presence(activity = discord.Game(name = "with your data"))
+
+
+
+    async def uploadData(self, data):
+        
+        message = discord.Embed(title = "Data was uploaded...", description = f"Data was uploaded at {time.time()}", color = 0x00ddaa)
+        message.add_field(name = "Data", value = data)
+        message.set_footer(text = "Uploaded by Afraaz")
+        message_id = await self.channel_default.send(embed = message)
+        
+        return message_id.id
+    
+    
+    
+    async def retrieveData(self, data):
+        ...
+    
+    
+    
+    async def deleteData(self, data):
+        ...
+
+
+
+
+
+class MongoDB():
+    
+    def __init__(self, token = None):
+        
+        load_dotenv()
+        
+        self.mongodb_token = token
+        
+        self.__initiateMongoDB()
+    
+    
+       
+    def __initiateMongoDB(self):
+        
+        self.client = MongoClient(self.mongodb_token)
+        self.collection = self.client.user_data.user_data
+    
+    
+    
+    def checkExistance(self, username):
+        
+        return True if self.collection.find_one({'username': username}) else False
+    
+    
+    
+    def createUser(self, payload):
+        
+        return self.collection.insert_one(payload)
+    
+    
+    
+    def retrieveUser(self, username):
+        
+        return self.collection.find_one({'username': username})
+        
+    
+    
+    
+    def updateUser(self, data):
+        ...
+    
+    
+    
+    def deleteUser(self, username):
+        
+        return self.collection.delete_one({'username': username})
+    
+    
+    
+    def banUser(self, username):
+        ...
