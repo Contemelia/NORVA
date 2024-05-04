@@ -1,132 +1,130 @@
-import discord
-
-# from discord_slash import SlashCommand
-from discord import app_commands
-from discord.ext import commands
 from dotenv import load_dotenv
+from hashlib import sha256
 from os import getenv
 
+from DatabaseHandler import MongoDB
 
 
 
 
-class DiscordDB(discord.Client):
+
+class DataHandler():
     
     def __init__(self):
         
-        super().__init__(intents = discord.Intents.all())
-        # SlashCommand(self, sync_commands = True)
-        
         load_dotenv()
         
-        self.__initiateDiscordDB()
-
-
-
-    def __initiateDiscordDB(self):
+        mongodb_token = getenv('MONGODB_TOKEN')
         
-        self.test_environment = True
-        self.discord_token = getenv('DISCORD_TOKEN')
-        
-        self.run(self.discord_token)
+        self.MongoDB = MongoDB(mongodb_token)    
     
     
-
-    # @self.event
-    async def on_ready(self):
+    
+    def __encryptFragment(self, fragment):
+        ...
+    
+    
+    
+    def __encryptFile(self, file):
+        ...
+    
+    
+    
+    def __decryptFragment(self, fragment):
+        ...
+    
+    
+    
+    def __decryptFile(self, file):
+        ...
+    
+    
+    
+    def __hashText(self, text):
         
-        self.channel_file_server = self.get_channel(int(getenv('CHANNEL_FILE_SERVER')))
-        self.channel_test = self.get_channel(int(getenv('CHANNEL_TEST')))
-        self.channel_webhook = self.get_channel(int(getenv('CHANNEL_WEBHOOK')))
+        return sha256(text.encode()).hexdigest()
+    
+    
+    
+    def uploadFile(self, file, credentials):
+        ...
+    
+    
+    
+    def retrieveFile(self, file):
+        ...
+    
+    
+    
+    def deleteFile(self, file, credentials):
+        ...
+    
+    
+    
+    def createAccount(self, credentials):
         
-        if self.test_environment:
-            self.channel_default = self.channel_test
+        username = credentials['username'].lower()
+        password = credentials['password']
+        display_name = credentials['display_name']
+        
+        username_hash = self.__hashText(username)
+        password_hash = self.__hashText(password)
+        
+        payload = {
+            'username': username_hash, 
+            'password': password_hash, 
+            'display_name': display_name, 
+            'standing': 10.0, 
+            'status': 'active', 
+            'allowed_storage': 5120, 
+            'consumed_storage': 0, 
+            'files': []
+        }
+        
+        if not self.MongoDB.checkExistance(username_hash):
+            self.MongoDB.createUser(payload)
+            return self.MongoDB.retrieveUser(username_hash)
         else:
-            self.channel_default = self.channel_file_server
+            return '1'
+    
+    
+    
+    def loginAccount(self, credentials):
+            
+            username = credentials['username'].lower()
+            password = credentials['password']
+            
+            username_hash = self.__hashText(username)
+            password_hash = self.__hashText(password)
+            
+            if self.MongoDB.checkExistance(username_hash):
+                user_credentials = self.MongoDB.retrieveUser(username_hash)
+                
+                if user_credentials['password'] == password_hash:
+                    if user_credentials['status'] == 'suspended':
+                        return '3'
+                    return user_credentials
+                else:
+                    return '1'
+            else:
+                return '2'
+    
+    
+    
+    def deleteAccount(self, credentials):
         
-        # message_id = await self.channel_default.send("I am online!")
-        # print(f"Bot is online! Message ID: {message_id.id}")
+        username = credentials['username'].lower()
+        password = credentials['password']
         
-        try:
-            await self.tree.sync()
-        except Exception as error:
-            pass
+        username_hash = self.__hashText(username)
+        password_hash = self.__hashText(password)
         
-        await self.change_presence(activity = discord.Game(name = "with your data"))
-
-
-
-    async def uploadData(self, data):
-        ...
-    
-    
-    
-    async def retrieveData(self, data):
-        ...
-    
-    
-    
-    async def deleteData(self, data):
-        ...
-
-
-
-
-
-class MongoDB():
-    
-    def __init__(self):
-        
-        load_dotenv()
-        
-        self.__initiateMongoDB()
-    
-    
-       
-    def __initiateMongoDB(self):
-        
-        self.mongodb_token = getenv('MONGODB_TOKEN')
-        print(self.mongodb_token)
-    
-    
-    
-    def createUser(self, payload):
-        ...
-    
-    
-    
-    def loginUser(self, username, password):
-        ...
-    
-    
-    
-    def updateUser(self, data):
-        ...
-    
-    
-    
-    def deleteUser(self, username, password):
-        ...
-    
-    
-    
-    def banUser(self, username):
-        ...
-
-
-
-
-def initiateScript():
-    
-    an_object = MongoDB()
-
-
-
-
-
-if __name__ == "__main__":
-    
-    try:
-        initiateScript()
-    except KeyboardInterrupt:
-        pass
+        if self.MongoDB.checkExistance(username_hash):
+            user = self.MongoDB.retrieveUser(username_hash)
+            
+            if user['password'] == password_hash:
+                self.MongoDB.deleteUser(username_hash, password_hash)
+            else:
+                return '1'
+        else:
+            return '2'
