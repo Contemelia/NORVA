@@ -27,36 +27,131 @@ class Configuration:
         self.stylesheet = f"""
         
         QMainWindow {{
-            background-color: {self.accent['background']};
-            
             font-family: 'Impact';
         }}
-                
+        
+        
+        
+        QScrollArea {{
+            background-color: rgba(0, 0, 0, 0);
+            border-color: rgba(0, 0, 0, 0);
+            border-width: 0px;
+            border: none;
+        }}
+        
+        
+        
+        #scrollableWidget {{
+            background-color: rgba(0, 0, 0, 0);
+        }}
+             
         
         
         #navigationBar {{
-            background-color: {self.accent['navigation-bar']};
+            background-color: {self.accent['primary-item-container']};
+            border-radius: 15px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+        }}
+        
+        #navigationBar:hover {{
+            background-color: {self.accent['transparent-hover']};
+        }}
+        
+        
+        
+        #messageBar {{
+            background-color: {self.accent['message-bar']};
+            border-radius: 15px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+        }}
+        
+        #messageBar:hover {{
+            background-color: {self.accent['secondary-hover']};
+            
+            color: {self.accent['accent-text']};
+        }}
+        
+        
+        #sideBarWidget {{
+            background-color: {self.accent['primary-container']};
+            border-radius: 15px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+        }}
+        
+        
+        
+        #primaryContainer {{
+            background-color: {self.accent['primary-container']};
             
             border-radius: 15px;
         }}
         
         
-        
-        #containerWidget {{
-            background-color: {self.accent['container-widget']};
-            
+        #secondaryContainer {{
+            background-color: {self.accent['secondary-container']};
             border-radius: 15px;
+        }}
+        
+        
+        #primaryItemContainer {{
+            background-color: {self.accent['primary-item-container']};
+            border-radius: 15px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+        }}
+        
+        
+        #secondaryItemContainer {{
+            background-color: {self.accent['secondary-item-container']};
+            border-radius: 15px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+            padding-left: 10px;
+            padding-right: 10px;
+        }}
+        
+        #secondaryItemContainer:hover {{
+            background-color: {self.accent['item-button-hover']};
+        }}
+        
+        #secondaryItemContainer:disabled {{
+            background-color: {self.accent['item-button-disabled']};
+            
+            color: {self.accent['disabled-text']};
+        }}
+        
+        
+        
+        #primaryBoldText {{
+            color: {self.accent['primary-text']};
+            font-family: 'Impact';
+            font-size: 10px;
+        }}
+        
+        #primaryBoldText:hover {{
+            color: {self.accent['primary-text-hover']};
         }}
         
         
         
         #primaryField {{
             background-color: {self.accent['primary-field']};
-            border-radius: 15px;
+            border-radius: 10px;
             
             color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
             font-size: 10px;
             font-weight: regular;
+            padding-left: 10px;
+            padding-right: 10px;
         }}
         
         #primaryField:focus {{
@@ -64,6 +159,24 @@ class Configuration:
             
             color: {self.accent['primary-text-hover']};
             font-weight: bold;
+        }}
+        
+        #primaryField:hover {{
+            background-color: {self.accent['primary-field-hover']};
+        }}
+        
+        #primaryField:disabled {{
+            background-color: {self.accent['primary-field-disabled']};
+            
+            color: {self.accent['accent-text']};
+        }}
+        
+        
+        
+        #itemLabel {{
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+            font-size: 12px;
         }}
         
         
@@ -84,6 +197,21 @@ class Configuration:
         }}
         
         
+        #itemButton {{
+            background-color: {self.accent['item-button']};
+            border-radius: 10px;
+            
+            color: {self.accent['primary-text']};
+            font-size: 10px;
+            font-weight: bold;
+        }}
+        
+        #itemButton:hover {{
+            background-color: {self.accent['item-button-hover']};
+            
+            color: {self.accent['accent-text']};
+        }}
+                
         
         #exitButton {{
             background-color: {self.accent['exit-button']};
@@ -95,14 +223,13 @@ class Configuration:
         }}
         
         
-        
-        #dynamicButton {{
+        #logoutButton {{
             background-color: {self.accent['logout-button']};
             border-radius: 5px;
         }}
         
-        #dynamicButton:hover {{
-            background-color: {self.accent['alternate-hover']};
+        #logoutButton:hover {{
+            background-color: {self.accent['hover']};
         }}
         
         
@@ -113,7 +240,7 @@ class Configuration:
         }}
         
         #themeButton:hover {{
-            background-color: {self.accent['alternate-hover']};
+            background-color: {self.accent['hover']};
         }}
         
         
@@ -150,6 +277,93 @@ class Configuration:
             color: {self.accent['secondary-text-hover']};
         }}
         
+        
+        
+        #fileName {{
+            background-color: {self.accent['primary-item-container']};
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 5px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+            font-size: 10px;
+        }}
+        
+        #fileName:hover {{
+            background-color: {self.accent['secondary-item-container']};
+        }}
+        
+        
+        #fileExtension {{
+            background-color: {self.accent['primary-item-container']};
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 5px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+            font-size: 10px;
+            font-weight: bold;
+        }}
+        
+        #fileExtension:hover {{
+            color: {self.accent['accent-text']};
+        }}
+        
+        
+        #uploadDate {{
+            background-color: {self.accent['secondary-item-container']};
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 5px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+            font-size: 10px;
+        }}
+        
+        #uploadDate:hover {{
+            background-color: {self.accent['accent-container']};
+            
+            color: {self.accent['secondary-text']};
+        }}
+        
+        
+        #deleteButton {{
+            background-color: {self.accent['item-button-hover']};
+            border-radius: 15px;
+            
+            color: {self.accent['exit-button']};
+            font-family: 'Nirmala UI';
+            font-size: 10px;
+            font-weight: bold;
+        }}
+        
+        #deleteButton:hover {{
+            background-color: {self.accent['exit-button']};
+            
+            color: {self.accent['primary-text']};
+        
+        }}
+        
+        
+        #actionButton {{
+            background-color: {self.accent['item-button-hover']};
+            border-radius: 15px;
+            
+            color: {self.accent['primary-text']};
+            font-family: 'Nirmala UI';
+            font-size: 10px;
+            font-weight: bold;
+        }}
+        
+        #actionButton:hover {{
+            background-color: {self.accent['accent-container']};
+            
+            color: {self.accent['secondary-text']};
+        }}
+        
         """
     
     
@@ -167,22 +381,21 @@ class Configuration:
         else:
             
             self.accent['background'] = '#f3e8ff'
-            self.accent['primary-container'] = '#07011C'
+            self.accent['primary-container'] = 'rgba(23, 23, 26, 0.7)'
+            self.accent['secondary-container'] = '#07011C'
             self.accent['hover'] = '#f3e8ff'
             self.accent['alternate-hover'] = '#1d0554'
-            self.accent['navigation-bar'] = '#1b171f'
+            self.accent['navigation-bar'] = '#17171A'
+            self.accent['message-bar'] = 'rgba(23, 23, 26, 0.7)'
             
             self.accent['container-widget'] = 'rgba(10, 5, 20, 0.7)'
             self.accent['primary-field'] = '#09011A'
             self.accent['primary-field-hover'] = '#160F27'
             self.accent['primary-field-focus'] = '#09011A'
             
-            self.accent['theme-button'] = '#6f00d1'
-            self.accent['exit-button'] = '#f50541'
-            self.accent['logout-button'] = '#dbbd25'
-            
             self.accent['primary-text'] = '#f3e8ff'
             self.accent['primary-text-hover'] = '#6f00d1'
+            self.accent['primary-text-hover-accent'] = '#6f00d1'
             self.accent['secondary-text'] = '#1b171f'
             self.accent['secondary-text-hover'] = '#6f00d1'
             
@@ -190,6 +403,35 @@ class Configuration:
             self.accent['primary-button-hover'] = '#f3e8ff'
             self.accent['secondary-button'] = '#f3e8ff'
             self.accent['secondary-button-hover'] = '#09011A'
+            
+            
+            
+            self.accent['primary-container'] = 'rgba(23, 23, 26, 0.7)'
+            self.accent['secondary-container'] = 'rgba(190, 179, 216, 0.1)'
+            self.accent['accent-container'] = '#BEB3D8'
+            self.accent['primary-item-container'] = '#17171A'
+            self.accent['secondary-item-container'] = '#222126'
+            self.accent['primary-hover'] = '#BEB3D8'
+            self.accent['secondary-hover'] = '#17171A'
+            self.accent['transparent-hover'] = 'rgba(23, 23, 26, 0.7)'
+            
+            self.accent['primary-text'] = '#BEB3D8'
+            self.accent['secondary-text'] = '#17171A'
+            self.accent['accent-text'] = '#9f0fe5'
+            self.accent['disabled-text'] = '#857F73'
+            
+            self.accent['primary-field'] = 'rgba(190, 179, 216, 0.1)'
+            self.accent['primary-field-hover'] = 'rgba(0, 0, 18, 0.7)'
+            self.accent['primary-field-focus'] = 'rgba(10, 10, 30, 0.7)'
+            self.accent['primary-field-disabled'] = 'rgba(190, 179, 216, 0.1)'
+            
+            self.accent['item-button'] = '#222126'
+            self.accent['item-button-hover'] = 'rgba(190, 179, 216, 0.1)'
+            self.accent['item-button-disabled'] = 'rgba(23, 23, 26, 0.3)'
+            
+            self.accent['theme-button'] = '#BEB3D8'
+            self.accent['exit-button'] = '#E43D25'
+            self.accent['logout-button'] = '#E59525'
     
         if self.theme and self.accent:
             self.applyTheme()
