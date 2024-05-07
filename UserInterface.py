@@ -1,4 +1,4 @@
-from os import mkdir
+from os import mkdir, path, startfile
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
@@ -44,6 +44,8 @@ class UserInterface(QMainWindow):
         self.user_files = []
         
         self.interaction_selected_file = None
+        self.interaction_selected_key_file = None
+    
     
     
     
@@ -391,7 +393,7 @@ class UserInterface(QMainWindow):
         status_container.move(30, 30)
         status_label = QLabel(status_container)
         # status_label.setObjectName('itemLabel')
-        status_label.setStyleSheet("color: #BEB3D8; font-family: 'Impact'; font-size: 12px;")
+        status_label.setStyleSheet("color: #BEB3D8; font-family: 'Nirmala UI'; font-size: 10px;")
         status_label.setFixedHeight(30)
         status_label.move(10, 0)
         status_label.setText('STATUS')
@@ -441,6 +443,7 @@ class UserInterface(QMainWindow):
     def switchToUploadPanel(self):
         
         self.interaction_selected_file = None
+        self.attained_atleast_once = False
             
         try:
             self.interaction_stacked_widget.removeWidget(self.upload_panel_widget)
@@ -488,10 +491,10 @@ class UserInterface(QMainWindow):
         # self.get_fragment_button.move(30, 110)
         self.get_fragment_button.move(60, 110)
         self.get_fragment_button.setText('Attain file key...')
-        # self.get_fragment_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.get_fragment_button.setToolTip('Click to attain the key for the file.')
+        self.get_fragment_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.get_fragment_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.get_fragment_button.setDisabled(True)
-        # self.get_fragment_button.clicked.connect(lambda: self.showMessage('Fragment attained successfully!', '#8DC63F'))
         self.interaction_upload_button = QPushButton(self.upload_panel_widget)
         self.interaction_upload_button.setObjectName('actionButton')
         self.interaction_upload_button.setFixedSize(200, 30)
@@ -504,6 +507,123 @@ class UserInterface(QMainWindow):
         
         self.interaction_stacked_widget.addWidget(self.upload_panel_widget)
         self.interaction_stacked_widget.setCurrentWidget(self.upload_panel_widget)
+    
+    
+    
+    def switchToOpenPanel(self, index):
+        
+        self.interaction_selected_key_file = None
+        
+        try:
+            self.interaction_stacked_widget.removeWidget(self.open_panel_widget)
+        except:
+            pass
+        
+        self.open_panel_widget = QWidget(self.interaction_stacked_widget)
+        self.open_panel_widget.setObjectName('secondaryContainer')
+        self.open_panel_widget.setFixedSize(260, self.Configuration.dimension[1] - 470)
+        # self.open_panel_widget.move(30, 230)
+        
+        self.key_file_button = QPushButton(self.open_panel_widget)
+        self.key_file_button.setObjectName('secondaryItemContainer')
+        self.key_file_button.setFixedSize(200, 30)
+        self.key_file_button.move(30, 30)
+        self.key_file_button.setText('Please provide the key file...')
+        self.key_file_button.setToolTip('Click to select the key file.')
+        self.key_file_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.key_file_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.key_file_button.clicked.connect(lambda: self.clickInteractionsSelectKeyFileButton())
+        
+        self.key_file_password_field = QLineEdit(self.open_panel_widget)
+        self.key_file_password_field.setObjectName('secondaryItemContainer')
+        self.key_file_password_field.setFixedSize(200, 30)
+        self.key_file_password_field.move(30, 70)
+        self.key_file_password_field.setPlaceholderText('Password for the key file...')
+        self.key_file_password_field.setEchoMode(QLineEdit.EchoMode.Password)
+        self.key_file_password_field.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.key_file_password_field.setToolTip('Password for the key file.')
+        self.key_file_password_field.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.user_password_field = QLineEdit(self.open_panel_widget)
+        self.user_password_field.setObjectName('secondaryItemContainer')
+        self.user_password_field.setFixedSize(200, 30)
+        self.user_password_field.move(30, 110)
+        self.user_password_field.setPlaceholderText('Your password...')
+        self.user_password_field.setEchoMode(QLineEdit.EchoMode.Password)
+        self.user_password_field.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.user_password_field.setToolTip('Please provide the password you used to sign up.')
+        self.user_password_field.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.interaction_open_button = QPushButton(self.open_panel_widget)
+        self.interaction_open_button.setObjectName('actionButton')
+        self.interaction_open_button.setFixedSize(200, 30)
+        self.interaction_open_button.move(30, 170)
+        self.interaction_open_button.setText('Open it!')
+        self.interaction_open_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.interaction_open_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.interaction_open_button.clicked.connect(lambda: self.clickOpenButton(index))
+        # open_button.clicked.connect(lambda: self.showMessage('File opened successfully!', '#8DC63F'))
+        
+        self.interaction_stacked_widget.addWidget(self.open_panel_widget)
+        self.interaction_stacked_widget.setCurrentWidget(self.open_panel_widget)
+    
+    
+    
+    def switchToDeletePanel(self, index):
+        
+        self.interaction_selected_key_file = None
+        
+        try:
+            self.interaction_stacked_widget.removeWidget(self.delete_panel_widget)
+        except:
+            pass
+        
+        self.delete_panel_widget = QWidget(self.interaction_stacked_widget)
+        self.delete_panel_widget.setObjectName('secondaryContainer')
+        self.delete_panel_widget.setFixedSize(260, self.Configuration.dimension[1] - 440)
+        # self.delete_panel_widget.move(30, 230)
+        
+        self.key_file_button = QPushButton(self.delete_panel_widget)
+        self.key_file_button.setObjectName('secondaryItemContainer')
+        self.key_file_button.setFixedSize(200, 30)
+        self.key_file_button.move(30, 30)
+        self.key_file_button.setText('Please provide the key file...')
+        self.key_file_button.setToolTip('Click to select the key file.')
+        self.key_file_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.key_file_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.key_file_button.clicked.connect(lambda: self.clickInteractionsSelectKeyFileButton())
+        
+        self.key_file_password_field = QLineEdit(self.delete_panel_widget)
+        self.key_file_password_field.setObjectName('secondaryItemContainer')
+        self.key_file_password_field.setFixedSize(200, 30)
+        self.key_file_password_field.move(30, 70)
+        self.key_file_password_field.setPlaceholderText('Password for the key file...')
+        self.key_file_password_field.setEchoMode(QLineEdit.EchoMode.Password)
+        self.key_file_password_field.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.key_file_password_field.setToolTip('Password for the key file.')
+        self.key_file_password_field.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        delete_warning_label = QLabel(self.delete_panel_widget)
+        delete_warning_label.setObjectName('deleteButton')
+        delete_warning_label.setFixedSize(200, 45)
+        delete_warning_label.setText("WARNING: This action cannot be undone.")
+        delete_warning_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        delete_warning_label.setWordWrap(True)
+        delete_warning_label.move(30, 130)
+        
+        self.interaction_delete_button = QPushButton(self.delete_panel_widget)
+        self.interaction_delete_button.setObjectName('actionButton')
+        self.interaction_delete_button.setFixedSize(200, 30)
+        self.interaction_delete_button.move(30, 200)
+        self.interaction_delete_button.setText('Delete it!')
+        name = self.user_files[index]['name']
+        self.interaction_delete_button.setToolTip(f"This action will delete '{name}' and will render it unrecoverable.")
+        self.interaction_delete_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.interaction_delete_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.interaction_delete_button.clicked.connect(lambda: self.clickDeleteButton(index))
+        
+        self.interaction_stacked_widget.addWidget(self.delete_panel_widget)
+        self.interaction_stacked_widget.setCurrentWidget(self.delete_panel_widget)
     
     
     
@@ -529,7 +649,7 @@ class UserInterface(QMainWindow):
             file_list_container_layout.setContentsMargins(0, 0, 0, 0)
             file_list_container_layout.setSpacing(10)
             
-            for file in self.user_files:
+            for index, file in enumerate(self.user_files):
                 
                 file_container = QWidget(file_list_container_widget)
                 file_container.setObjectName('primaryContainer')
@@ -564,6 +684,7 @@ class UserInterface(QMainWindow):
                 file_delete_button.move(10, 50)
                 file_delete_button.setText('DELETE')
                 file_delete_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                file_delete_button.clicked.connect(lambda: self.switchToDeletePanel(index))
                 # file_delete_button.clicked.connect(lambda: self.DataHandler.deleteFile(file['name'], self.user_credentials))
                 file_cancel_button = QPushButton(file_container)
                 file_cancel_button.setObjectName('actionButton')
@@ -586,6 +707,7 @@ class UserInterface(QMainWindow):
                 file_open_button.setText('OPEN')
                 file_open_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 # file_open_button.clicked.connect(lambda: self.DataHandler.openFile(file['name'], self.user_credentials))
+                file_open_button.clicked.connect(lambda: self.switchToOpenPanel(index))
                 
                 file_list_container_layout.addWidget(file_container)
             
@@ -743,11 +865,131 @@ class UserInterface(QMainWindow):
             else:
                 self.user_files = result[0]
                 self.user_credentials['consumed_storage'] = result[1]
-                ...
-                self.showMessage('File uploaded successfully!', '#8DC63F')
                 
-                self.createFileList()
-                self.switchToInfoPanel()
+                self.interaction_upload_button.setDisabled(False)
+                self.interaction_upload_button.setText('Close this page')
+                self.interaction_upload_button.setToolTip('You are required to save the key file atleast once to be able to close this page.')
+                self.interaction_upload_button.clicked.disconnect()
+                self.interaction_upload_button.clicked.connect(lambda: self.showMessage('You are required to save the key file atleast once to be able to close this page.'))
+                
+                encrypted_fragment_file = result[2]
+                self.get_fragment_button.clicked.connect(lambda: self.clickAttainFragmentFileButton(encrypted_fragment_file))
+                self.get_fragment_button.setDisabled(False)
+                
+                
+                # if self.attained_atleast_once:
+                #     self.showMessage('File uploaded successfully!', '#8DC63F')
+                #     self.createFileList()
+                #     self.switchToInfoPanel()
+    
+    
+    
+    def clickAttainFragmentFileButton(self, encrypted_fragment_file):
+        
+        Tk().withdraw()
+        
+        # take the save location from the user with the extension .fmt
+        save_location = filedialog.asksaveasfilename(defaultextension = '.fmt', filetypes = [('Fragment File', '*.fmt')])
+        
+        if save_location:
+            
+            # code to save the encrypted fragment file as .fmt file in th esave_location
+            with open(save_location, 'wb') as file:
+                file.write(encrypted_fragment_file)
+            
+            self.attained_atleast_once = True
+            # self.interaction_upload_button.setDisabled(True)
+            self.interaction_upload_button.setText('Close this page')
+            self.interaction_upload_button.setToolTip('Close this page and return to the home page.')
+            self.interaction_upload_button.clicked.disconnect()
+            self.interaction_upload_button.clicked.connect(lambda: [self.showMessage('File uploaded successfully!', '#8DC63F'), self.createFileList(), self.switchToInfoPanel()])
+        else:
+            self.showMessage('Fragment file save cancelled.')
+            return
+        
+        ...
+    
+    
+    
+    def clickInteractionsSelectKeyFileButton(self):
+        
+        Tk().withdraw()
+        file = filedialog.askopenfile()
+            
+        if file:
+            
+            self.interaction_selected_key_file = file
+            self.key_file_button.setText(file.name.split('/')[-1])
+            self.key_file_button.setToolTip(file.name.split('/')[-1])
+            self.showMessage('Key file selected successfully!', '#8DC63F')
+        else:
+            self.showMessage('Key file selection cancelled.')
+    
+    
+    
+    def clickOpenButton(self, index):
+        
+        if self.interaction_selected_key_file is None:
+            self.showMessage('Please select a key file to open the file.')
+            return
+        else:
+            error_codes = {
+                '0': 'You are not connected to the internet. Please try again.', 
+                '1': 'One or more of your credential(s) is incorrect. Please try again.', 
+                '2': 'You provided an incorrect key file. Please try again.', 
+                '3': 'One or more of the fragments are missing. Please try again.', 
+                '4': 'One or more of the fragments are corrupted. Please try again.'
+            }
+        
+        with open(self.interaction_selected_key_file.name, 'rb') as stream:
+            key_file = stream.read()
+        
+        result = self.DataHandler.openFile(key_file, self.key_file_password_field.text(), {'username': self.user_credentials['username'], 'password': self.user_credentials['password']}, self.user_files[index])
+        if isinstance(result, str) and result in error_codes:
+            print(error_codes[result])
+            self.showMessage(error_codes[result])
+        else:
+            
+            save_location = filedialog.asksaveasfilename(defaultextension = self.user_files[index]['extension'], filetypes = [(self.user_files[index]['extension'].upper() + ' File', '*' + self.user_files[index]['extension'])])
+            with open(save_location, 'wb') as file:
+                file.write(result)
+            
+            # Code to open the file in a window
+            with open(save_location, 'rb') as file:
+                file_data = file.read()
+
+            if path.exists(save_location):
+                startfile(save_location)
+            
+            self.showMessage('File opened successfully!', '#8DC63F')
+            self.interaction_stacked_widget.setCurrentWidget(self.info_panel_widget)
+    
+    
+    
+    def clickDeleteButton(self, index):
+        
+        if self.interaction_selected_key_file is None:
+            self.showMessage('Please select a key file to open the file.')
+            return
+        else:
+            error_codes = {
+                '0': 'You are not connected to the internet. Please try again.', 
+                '1': 'One or more of your credential(s) is incorrect. Please try again.', 
+                '2': 'You provided an incorrect key file. Please try again.', 
+                '3': 'One or more of the fragments are missing. Please try again.', 
+                '4': 'One or more of the fragments are corrupted. Please try again.'
+            }
+        
+        result = self.DataHandler.deleteFile(self.interaction_selected_key_file, self.interaction_file_password_field.text(), {'username': self.user_credentials, 'password': self.user_credentials['password']}, self.user_files, index)
+        # result = self.DataHandler.deleteFile(self.interaction_selected_key_file, self.key_file_password_field.text(), self.user_credentials['username'], self.user_files, index)
+        if isinstance(result, str) and result in error_codes:
+            print(error_codes[result])
+            self.showMessage(error_codes[result])
+        else:
+            ...
+            self.showMessage('File deleted successfully!', '#8DC63F')
+            self.interaction_stacked_widget.setCurrentWidget(self.info_panel_widget)
+        
 
 
 
