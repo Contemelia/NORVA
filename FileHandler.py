@@ -65,14 +65,9 @@ class DataHandler():
         encrypted_fragment_file = cipher.nonce + encrypted_fragment_file + tag
         
         return encrypted_fragment_file
-        # encrypted_fragment_file = AES.new(key, AES.MODE_EAX).encrypt(fragment_file.encode('utf-8'))
+        # encrypted_fragment_file = AES.new(key, AES.MODE_EAX).encrypt(fragment_file.encode('utf-8'))    
         
-        
-                
-        
-        
-    
-    
+
     
     def __encryptFile(self, file, key):
         
@@ -88,7 +83,18 @@ class DataHandler():
     
     
     def __decryptAndCombineFragment(self, fragment, key):
-        ...
+        
+        dcipher = AES.new(key, AES.MODE_EAX, nonce = fragment[:16])
+        decrypted_data = dcipher.decrypt_and_verify(fragment[16:-16], fragment[-16:])
+        decrypted_data = decrypted_data.decode('utf-8')
+        
+        combined_file = b''
+        
+        for fragment in decrypted_data.split('\n'):
+            with open(f'Data/{fragment}', 'rb') as stream:
+                combined_file += stream.read()
+        
+        return combined_file
     
     
     
@@ -123,25 +129,11 @@ class DataHandler():
     
     
     
-    def uploadFile(self, file, credentials):
-        ...
-    
-    
-    
-    def retrieveFile(self, file):
-        ...
-    
-    
-    
-    def deleteFile(self, file, credentials):
-        ...
-    
-    
-    
     def createAccount(self, credentials):
         
         if not self.__checkConnection():
-            return '0'
+            pass
+            # return '0'
         
         username = credentials['username'].lower()
         password = credentials['password']
@@ -156,6 +148,7 @@ class DataHandler():
             'username': username_hash, 
             'password': password_hash, 
             'display_name': display_name, 
+            'type': 'regular', 
             'standing': 10.0, 
             'status': 'active', 
             'allowed_storage': 5120, 
@@ -174,7 +167,8 @@ class DataHandler():
     def loginAccount(self, credentials):
         
         if not self.__checkConnection():
-            return '0'
+            pass
+            # return '0'
             
         username = credentials['username'].lower()
         password = credentials['password']
@@ -199,7 +193,8 @@ class DataHandler():
     def deleteAccount(self, credentials):
         
         if not self.__checkConnection():
-            return '0'
+            pass
+            # return '0'
         
         username = credentials['username'].lower()
         password = credentials['password']
@@ -231,13 +226,12 @@ class DataHandler():
     def uploadFile(self, file, file_password, fragment_size, credentials, file_list, consumed_storage, allowed_storage):
         
         if not self.__checkConnection():
-            return '0'
+            pass
+            # return '0'
         
         username = credentials['username']
         password = credentials['password']
         
-        username_hash = self.__hashText(username)
-        password_hash = self.__hashText(password)
         file_password_hash = self.__hashText(file_password)
         
         if self.MongoDB.checkExistance(username):
@@ -284,6 +278,41 @@ class DataHandler():
                 return '1'
         else:
             return '2'
+    
+    
+    
+    def openFile(self, file, file_password, credentials, current_file):
+        
+        if not self.__checkConnection():
+            pass
+            # return '0'
+        
+        username = credentials['username']
+        password = credentials['password']
+        file_password_hash = self.__hashText(file_password)
+        file_hash = self.__hashText(str(file))
+        
+        if file_password_hash != current_file['file_password_hash']:
+            return '1'
+        
+        if file_hash != current_file['fragment_hash']:
+            return '2'
+        
+        key = self.__keyDerivationFunction(username, password, file_password_hash)
+        key_hash = self.__hashText(key)
+        if key_hash != current_file['key_hash']:
+            return '1'
+        
+        decrypted_fragment_file = self.__decryptAndCombineFragment(file, key.encode('utf-8'))
+        
+        decrypted_file = self.__decryptFile(decrypted_fragment_file, key.encode('utf-8'))
+        
+        return decrypted_file
+        
+        
+        
+    def deleteFile(self, fragment_file, file_password, credentials, file_list, index):
+        ...
 
 
 

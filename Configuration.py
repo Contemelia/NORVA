@@ -338,6 +338,7 @@ class Configuration:
             font-family: 'Nirmala UI';
             font-size: 10px;
             font-weight: bold;
+            padding: 5px;
         }}
         
         #deleteButton:hover {{
