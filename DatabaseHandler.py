@@ -60,6 +60,18 @@ class MongoDB():
     
     
     
+    def renameFile(self, username, file):
+        
+        return self.collection.update_one({'username': username}, {'$set': {'files': file}})
+    
+    
+    
+    def deleteFile(self, username, file, consumed_storage):
+        
+        return self.collection.update_one({'username': username}, {'$set': {'consumed_storage': consumed_storage, 'files': file}})
+    
+    
+    
     def deleteUser(self, username):
         
         return self.collection.delete_one({'username': username})
