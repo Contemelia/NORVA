@@ -50,7 +50,28 @@ class UserInterface(QMainWindow):
     
     
     def eventFilter(self, object, event):
-        ...
+        if object.objectName() == 'exitButton' and event.type() == QEvent.Type.HoverEnter:
+            self.switchMessage('Exit NORVA.', '#E43D25')
+            return True
+        elif object.objectName() == 'exitButton' and event.type() == QEvent.Type.HoverLeave:
+            self.switchMessage('Welcome to Contemlium Test Environment!', '#BEB3D8')
+            return True
+
+        if object.objectName() == 'themeButton' and event.type() == QEvent.Type.HoverEnter:
+            self.switchMessage('Change theme.', '#8DC63F')
+            return True
+        elif object.objectName() == 'themeButton' and event.type() == QEvent.Type.HoverLeave:
+            self.switchMessage('Welcome to Contemlium Test Environment!', '#BEB3D8')
+            return True
+
+        if object.objectName() == 'logoutButton' and event.type() == QEvent.Type.HoverEnter:
+            self.switchMessage('Logout from your profile.', '#E43D25')
+            return True
+        elif object.objectName() == 'logoutButton' and event.type() == QEvent.Type.HoverLeave:
+            self.switchMessage('Welcome to Contemlium Test Environment!', '#BEB3D8')
+            return True
+
+        return False  # Return False if no conditions above are met
 
     
     
@@ -102,6 +123,13 @@ class UserInterface(QMainWindow):
             
             # This will start a timer of 2.5 secs and set the color and message content to default.
             QTimer.singleShot(2500, lambda: [self.adaptive_bar.setStyleSheet(f"color: {self.Configuration.accent['primary-text']};"), self.adaptive_bar.setText('Welcome to Contemlium Test Environment!')])
+            
+            
+    
+    def switchMessage(self, message, color = '#E43D25'):
+        
+        self.adaptive_bar.setText(message)
+        self.adaptive_bar.setStyleSheet(f"color: {color};")
     
     
     def createNavigationBar(self):
@@ -120,7 +148,8 @@ class UserInterface(QMainWindow):
         exit_button.setObjectName('exitButton')
         exit_button.setFixedSize(10, 10)
         exit_button.move(50, 10)
-        # exit_button.installEventFilter(self)
+        exit_button.setToolTip('Exit NORVA.')
+        exit_button.installEventFilter(self)
         exit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_button.clicked.connect(QCoreApplication.instance().quit)
         
@@ -133,6 +162,11 @@ class UserInterface(QMainWindow):
         self.logout_button.setObjectName('logoutButton')
         self.logout_button.setFixedSize(10, 10)
         self.logout_button.move(30, 10)
+        self.logout_button.setToolTip('Login first to logout.')
+        self.logout_button.installEventFilter(self)
+        self.logout_button.clicked.connect(lambda: [self.initiateCommonVariables(), self.primary_stacked_widget.setCurrentWidget(self.welcome_page_widget), self.back_button.setIcon(QIcon(".\\Images\\light-info.png"))])
+        self.logout_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.logout_button.setCursor(Qt.CursorShape.PointingHandCursor)
         
         self.back_button = QPushButton(self.navigation_bar_container)
         self.back_button.setObjectName('primaryButton')
@@ -146,13 +180,16 @@ class UserInterface(QMainWindow):
         self.back_button.clicked.connect(self.clickBackButton)
         self.back_button.setEnabled(False)
         
-        self.adaptive_bar = QLabel(self.navigation_bar_container)
+        self.adaptive_bar = QPushButton(self.navigation_bar_container)
         self.adaptive_bar.setObjectName('messageBar')
         self.adaptive_bar.setFixedSize(500, 30)
         self.adaptive_bar.move(self.Configuration.dimension[0] // 2 - 250, 0)
-        self.adaptive_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # self.adaptive_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.adaptive_bar.setCursor(Qt.CursorShape.SizeAllCursor)
         self.adaptive_bar.setText('Welcome to Contemlium Test Environment!')
+        self.adaptive_bar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # self.adaptive_bar.setStyleSheet(f"color: {self.Configuration.accent['primary-text']};")
+        self.adaptive_bar.installEventFilter(self)
     
     
     
@@ -285,6 +322,8 @@ class UserInterface(QMainWindow):
             self.primary_stacked_widget.removeWidget(self.home_page_widget)
         except:
             pass
+        
+        self.logout_button.setToolTip('Logout from your profile.')
         
         self.home_page_widget = QWidget(self.primary_stacked_widget)
         
@@ -629,92 +668,93 @@ class UserInterface(QMainWindow):
     
     def createFileList(self):
         
-        if len(self.user_files) == 0:
-            ...
-        else:
+        # if len(self.user_files) == 0:
+        #     ...
+        # else:
             
-            try:
-                self.file_list_container.removeWidget(self.file_list_container.currentWidget())
-            except:
-                pass
+        try:
+            self.file_list_container.removeWidget(self.file_list_container.currentWidget())
+        except:
+            pass
+        
+        file_list_scroll_area = QScrollArea(self.file_list_container)
+        file_list_scroll_area.setFixedSize(910, self.Configuration.dimension[1] - 130)
+        file_list_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        file_list_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        file_list_container_widget = QWidget(file_list_scroll_area)
+        file_list_container_widget.setObjectName('scrollableWidget')
+        file_list_container_layout = QVBoxLayout(file_list_container_widget)
+        file_list_container_layout.setContentsMargins(0, 0, 0, 0)
+        file_list_container_layout.setSpacing(10)
+        
+        for index, file in enumerate(self.user_files):
             
-            file_list_scroll_area = QScrollArea(self.file_list_container)
-            file_list_scroll_area.setFixedSize(910, self.Configuration.dimension[1] - 130)
-            file_list_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-            file_list_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            file_container = QWidget(file_list_container_widget)
+            file_container.setObjectName('primaryContainer')
+            file_container.setFixedSize(910, 90)
+            file_extension_label = QLabel(file_container)
+            file_extension_label.setObjectName('fileExtension')
+            file_extension_label.setFixedSize(50, 20)
+            file_extension_label.move(10, 10)
+            file_extension_label.setText(file['extension'].upper())
+            file_extension_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            file_name_label = QLineEdit(file_container)
+            file_name_label.setObjectName('fileName')
+            file_name_label.setFixedSize(630, 20)
+            file_name_label.move(80, 10)
+            file_name_label.setText(file['name'])
+            file_name_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+            file_size_label = QLabel(file_container)
+            file_size_label.setObjectName('fileName')
+            file_size_label.setFixedSize(50, 20)
+            file_size_label.move(720, 10)
+            file_size_label.setText(str(round(file['size'] / 1024, 2)) + " GB")
+            file_upload_date_label = QLabel(file_container)
+            file_upload_date_label.setObjectName('uploadDate')
+            file_upload_date_label.setFixedSize(80, 20)
+            file_upload_date_label.move(820, 10)
+            file_upload_date_label.setText(file['date'])
+            file_upload_date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             
-            file_list_container_widget = QWidget(file_list_scroll_area)
-            file_list_container_widget.setObjectName('scrollableWidget')
-            file_list_container_layout = QVBoxLayout(file_list_container_widget)
-            file_list_container_layout.setContentsMargins(0, 0, 0, 0)
-            file_list_container_layout.setSpacing(10)
+            file_delete_button = QPushButton(file_container)
+            file_delete_button.setObjectName('deleteButton')
+            file_delete_button.setFixedSize(70, 30)
+            file_delete_button.move(10, 50)
+            file_delete_button.setText('DELETE')
+            file_delete_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            file_delete_button.clicked.connect(lambda: self.switchToDeletePanel(index))
+            # file_delete_button.clicked.connect(lambda: self.DataHandler.deleteFile(file['name'], self.user_credentials))
+            file_cancel_button = QPushButton(file_container)
+            file_cancel_button.setObjectName('actionButton')
+            file_cancel_button.setFixedSize(70, 30)
+            file_cancel_button.move(100, 50)
+            file_cancel_button.setText('CANCEL')
+            file_cancel_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            file_cancel_button.clicked.connect(lambda: [self.showMessage('File action cancelled.'), self.interaction_stacked_widget.setCurrentWidget(self.info_panel_widget)])
+            file_rename_button = QPushButton(file_container)
+            file_rename_button.setObjectName('actionButton')
+            file_rename_button.setFixedSize(70, 30)
+            file_rename_button.move(740, 50)
+            file_rename_button.setText('RENAME')
+            file_rename_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            # file_rename_button.clicked.connect(lambda: self.DataHandler.renameFile(file['name'], self.user_credentials))
+            file_rename_button.clicked.connect(lambda: self.clickRenameButton(index, file_name_label.text()))
+            file_open_button = QPushButton(file_container)
+            file_open_button.setObjectName('actionButton')
+            file_open_button.setFixedSize(70, 30)
+            file_open_button.move(830, 50)
+            file_open_button.setText('OPEN')
+            file_open_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            # file_open_button.clicked.connect(lambda: self.DataHandler.openFile(file['name'], self.user_credentials))
+            file_open_button.clicked.connect(lambda: self.switchToOpenPanel(index))
             
-            for index, file in enumerate(self.user_files):
-                
-                file_container = QWidget(file_list_container_widget)
-                file_container.setObjectName('primaryContainer')
-                file_container.setFixedSize(910, 90)
-                file_extension_label = QLabel(file_container)
-                file_extension_label.setObjectName('fileExtension')
-                file_extension_label.setFixedSize(50, 20)
-                file_extension_label.move(10, 10)
-                file_extension_label.setText(file['extension'].upper())
-                file_extension_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                file_name_label = QLabel(file_container)
-                file_name_label.setObjectName('fileName')
-                file_name_label.setFixedSize(630, 20)
-                file_name_label.move(80, 10)
-                file_name_label.setText(file['name'])
-                file_name_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-                file_size_label = QLabel(file_container)
-                file_size_label.setObjectName('fileName')
-                file_size_label.setFixedSize(50, 20)
-                file_size_label.move(720, 10)
-                file_size_label.setText(str(round(file['size'] / 1024, 2)) + " GB")
-                file_upload_date_label = QLabel(file_container)
-                file_upload_date_label.setObjectName('uploadDate')
-                file_upload_date_label.setFixedSize(80, 20)
-                file_upload_date_label.move(820, 10)
-                file_upload_date_label.setText(file['date'])
-                file_upload_date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                
-                file_delete_button = QPushButton(file_container)
-                file_delete_button.setObjectName('deleteButton')
-                file_delete_button.setFixedSize(70, 30)
-                file_delete_button.move(10, 50)
-                file_delete_button.setText('DELETE')
-                file_delete_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                file_delete_button.clicked.connect(lambda: self.switchToDeletePanel(index))
-                # file_delete_button.clicked.connect(lambda: self.DataHandler.deleteFile(file['name'], self.user_credentials))
-                file_cancel_button = QPushButton(file_container)
-                file_cancel_button.setObjectName('actionButton')
-                file_cancel_button.setFixedSize(70, 30)
-                file_cancel_button.move(100, 50)
-                file_cancel_button.setText('CANCEL')
-                file_cancel_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                file_cancel_button.clicked.connect(lambda: [self.showMessage('File action cancelled.'), self.interaction_stacked_widget.setCurrentWidget(self.info_panel_widget)])
-                file_rename_button = QPushButton(file_container)
-                file_rename_button.setObjectName('actionButton')
-                file_rename_button.setFixedSize(70, 30)
-                file_rename_button.move(740, 50)
-                file_rename_button.setText('RENAME')
-                file_rename_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                # file_rename_button.clicked.connect(lambda: self.DataHandler.renameFile(file['name'], self.user_credentials))
-                file_open_button = QPushButton(file_container)
-                file_open_button.setObjectName('actionButton')
-                file_open_button.setFixedSize(70, 30)
-                file_open_button.move(830, 50)
-                file_open_button.setText('OPEN')
-                file_open_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                # file_open_button.clicked.connect(lambda: self.DataHandler.openFile(file['name'], self.user_credentials))
-                file_open_button.clicked.connect(lambda: self.switchToOpenPanel(index))
-                
-                file_list_container_layout.addWidget(file_container)
-            
-            file_list_container_widget.setLayout(file_list_container_layout)
-            file_list_scroll_area.setWidget(file_list_container_widget)
-            self.file_list_container.addWidget(file_list_scroll_area)
-            self.file_list_container.setCurrentWidget(file_list_scroll_area)
+            file_list_container_layout.addWidget(file_container)
+        
+        file_list_container_widget.setLayout(file_list_container_layout)
+        file_list_scroll_area.setWidget(file_list_container_widget)
+        self.file_list_container.addWidget(file_list_scroll_area)
+        self.file_list_container.setCurrentWidget(file_list_scroll_area)
     
     
     
@@ -979,16 +1019,33 @@ class UserInterface(QMainWindow):
                 '3': 'One or more of the fragments are missing. Please try again.', 
                 '4': 'One or more of the fragments are corrupted. Please try again.'
             }
+            
+        with open(self.interaction_selected_key_file.name, 'rb') as stream:
+            key_file = stream.read()
         
-        result = self.DataHandler.deleteFile(self.interaction_selected_key_file, self.interaction_file_password_field.text(), {'username': self.user_credentials, 'password': self.user_credentials['password']}, self.user_files, index)
-        # result = self.DataHandler.deleteFile(self.interaction_selected_key_file, self.key_file_password_field.text(), self.user_credentials['username'], self.user_files, index)
+        result = self.DataHandler.deleteFile(key_file, self.key_file_password_field.text(), {'username': self.user_credentials['username'], 'password': self.user_credentials['password']}, self.user_files, index, self.user_credentials['consumed_storage'])
         if isinstance(result, str) and result in error_codes:
             print(error_codes[result])
             self.showMessage(error_codes[result])
         else:
-            ...
+            
+            self.user_files = result[0]
+            print(self.user_files)
+            self.user_credentials['consumed_storage'] = result[1]
+            
             self.showMessage('File deleted successfully!', '#8DC63F')
+            self.createFileList()
             self.interaction_stacked_widget.setCurrentWidget(self.info_panel_widget)
+    
+    
+    
+    def clickRenameButton(self, index, file_name):
+        
+        result = self.DataHandler.renameFile(file_name, self.user_credentials['username'], self.user_files, index)
+        
+        self.user_files = result
+        self.showMessage('File renamed successfully!', '#8DC63F')
+        self.createFileList()
         
 
 

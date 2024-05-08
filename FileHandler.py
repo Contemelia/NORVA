@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from hashlib import sha256
-from os import getenv, listdir, path
+from os import getenv, listdir, path, remove
 from requests import exceptions, get
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -95,6 +95,17 @@ class DataHandler():
                 combined_file += stream.read()
         
         return combined_file
+    
+    
+    
+    def __decryptFragment(self, fragment, key):
+            
+        dcipher = AES.new(key, AES.MODE_EAX, nonce = fragment[:16])
+        decrypted_data = dcipher.decrypt_and_verify(fragment[16:-16], fragment[-16:])
+        decrypted_data = decrypted_data.decode('utf-8')
+        decrypted_data = decrypted_data.split('\n')
+        
+        return decrypted_data
     
     
     
@@ -308,11 +319,50 @@ class DataHandler():
         decrypted_file = self.__decryptFile(decrypted_fragment_file, key.encode('utf-8'))
         
         return decrypted_file
+    
+    
+    
+    def renameFile(self, new_name, credentials, file_list, index):
+        
+        file_list[index]['name'] = new_name
+        
+        self.MongoDB.renameFile(credentials, file_list)
+        
+        return file_list
         
         
         
-    def deleteFile(self, fragment_file, file_password, credentials, file_list, index):
-        ...
+    def deleteFile(self, fragment_file, file_password, credentials, file_list, index, consumed_storage):
+        
+        username = credentials['username']
+        password = credentials['password']
+        file_password_hash = self.__hashText(file_password)
+        file_hash = self.__hashText(str(fragment_file))
+        
+        if file_password_hash != file_list[index]['file_password_hash']:
+            return '1'
+        
+        if file_hash != file_list[index]['fragment_hash']:
+            return '2'
+        
+        key = self.__keyDerivationFunction(username, password, file_password_hash)
+        key_hash = self.__hashText(key)
+        if key_hash != file_list[index]['key_hash']:
+            return '1'
+        
+        decrypted_fragment = self.__decryptFragment(fragment_file, key.encode('utf-8'))
+        for fragment in decrypted_fragment:
+            path = f'Data/{fragment}'
+            try:
+                remove(path)
+            except:
+                pass
+        
+        consumed_storage -= file_list[index]['size']
+        file_list.pop(index)
+        self.MongoDB.deleteFile(username, file_list, consumed_storage)
+        
+        return file_list, consumed_storage
 
 
 
